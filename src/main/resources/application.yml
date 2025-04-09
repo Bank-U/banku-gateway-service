@@ -1,0 +1,93 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: 
+              - "http://localhost:4200"
+              - "https://localhost:4200"
+            allowedMethods: 
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: 
+              - Authorization
+              - Content-Type
+              - X-Requested-With
+              - Accept
+              - Origin
+              - Access-Control-Request-Method
+              - Access-Control-Request-Headers
+            exposedHeaders:
+              - Access-Control-Allow-Origin
+              - Access-Control-Allow-Credentials
+            allowCredentials: true
+            maxAge: 3600
+      routes:
+        # Auth Routes (Public)
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - name: JwtAuthenticationFilter
+        
+        # User Service Routes (Protected)
+        - id: user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: JwtAuthenticationFilter
+        
+        # Engine Service Routes
+        - id: engine-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/v1/engine/**
+          filters:
+            - name: JwtAuthenticationFilter
+        
+        # OpenBanking Service Routes
+        - id: openbanking-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v1/openbanking/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+  security:
+    whitelist:
+      - /api/v1/auth/**
+      - /api/v1/users/register
+      - /actuator/**
+
+# JWT Configuration
+jwt:
+  secret: 2a1cf8399b4951d738e9b62c63b11c867f7c4e471cb108c1e7b4a4377e5d7a4f
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+
+# Logging Configuration
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    com.banku.gatewayservice: DEBUG 

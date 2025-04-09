@@ -1,0 +1,76 @@
+# Compiled class files
+*.class
+
+# Maven target directory
+/target/
+
+# IntelliJ project files
+.idea/
+*.iml
+
+# VS Code settings
+.vscode/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+
+# IDE-specific files
+*.swp
+*~
+
+# Java build files
+*.jar
+*.war
+*.ear
+
+# Lombok
+*.lombok
+
+# Spring Boot
+.spring-boot-devtools.properties
+
+# Help file
+HELP.md
+
+# STS specific files
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# NetBeans specific files
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Environment variables
+.env.local
+.env.*.local
+
+# Logs
+logs/
+
+# MongoDB specific files
+data/
+
+# Maven wrapper exclusion
+!.mvn/wrapper/maven-wrapper.jar
+
+# Main directory exclusion
+!**/src/main/**/target/
+!**/src/test/**/target/
