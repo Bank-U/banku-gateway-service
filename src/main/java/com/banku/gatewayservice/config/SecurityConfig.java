@@ -43,7 +43,6 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .cors(ServerHttpSecurity.CorsSpec::disable)
                 .authorizeExchange(authorize -> authorize
                         .pathMatchers(securityProperties.getWhitelist().toArray(new String[0])).permitAll()
                         .anyExchange().permitAll()
