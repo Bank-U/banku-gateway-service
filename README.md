@@ -10,6 +10,9 @@ This service acts as a single entry point for all BankU microservices, providing
 - Authentication and authorization via JWT
 - Request filtering
 - Monitoring and metrics
+- Rate limiting
+- Circuit breaking
+- Request/Response transformation
 
 ## Connected Microservices
 
@@ -25,11 +28,50 @@ The gateway is configured to run on port 8080 and redirect requests to the corre
 - `/api/v1/intelligence/**` -> Engine Service
 - `/api/v1/openbanking/**` -> OpenBanking Service
 
+### Rate Limiting
+
+```yaml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+```
+
+### Circuit Breaking
+
+```yaml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userService
+                fallbackUri: forward:/fallback
+```
+
 ## Security
 
 - Authentication endpoints (`/api/v1/users/auth/**` and `/api/v1/users/register`) are public
 - All other endpoints require a valid JWT token in the `Authorization: Bearer <token>` header
 - The JWT secret is configured in `application.yml`
+- CORS configuration for cross-origin requests
+- Rate limiting to prevent abuse
+- Request validation and sanitization
 
 ## Execution
 
@@ -50,3 +92,33 @@ docker-compose up -d
 - `/actuator/health`: Service status
 - `/actuator/info`: Service information
 - `/actuator/gateway`: Gateway routes information
+- `/actuator/metrics`: Performance metrics
+- `/actuator/circuitbreakers`: Circuit breaker status
+
+## Monitoring
+
+The gateway service provides monitoring capabilities through:
+
+- Spring Boot Actuator
+- Prometheus metrics
+- Grafana dashboards
+- Distributed tracing with Spring Cloud Sleuth
+
+## Development
+
+### Requirements
+
+- Java 17
+- Docker
+- Docker Compose
+
+### Local Setup
+
+1. Clone the repository
+2. Configure the microservices URLs in `application.yml`
+3. Run `docker-compose up -d` to start required services
+4. Run the application with `./mvnw spring-boot:run`
+
+## License
+
+This project is private and confidential.
