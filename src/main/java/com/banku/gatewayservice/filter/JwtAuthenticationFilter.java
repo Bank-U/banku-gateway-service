@@ -4,12 +4,15 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import com.banku.gatewayservice.config.SecurityConfig.SecurityProperties;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -19,10 +22,14 @@ import java.nio.charset.StandardCharsets;
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
 
     private final SecretKey key;
+    private final SecurityProperties securityProperties;
 
-    public JwtAuthenticationFilter(@org.springframework.beans.factory.annotation.Value("${jwt.secret}") String jwtSecret) {
+    public JwtAuthenticationFilter(
+            @Value("${jwt.secret}") String jwtSecret,
+            SecurityProperties securityProperties) {
         super(Config.class);
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        this.securityProperties = securityProperties;
     }
 
     @Override
@@ -77,8 +84,8 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     }
 
     private boolean isPublicEndpoint(String path) {
-        return path.startsWith("/api/v1/auth/") ||
-                path.startsWith("/actuator/");
+        return securityProperties.getWhitelist().stream()
+                .anyMatch(pattern -> path.matches(pattern.replace("**", ".*")));
     }
 
     private Mono<Void> handleError(org.springframework.web.server.ServerWebExchange exchange, String message, HttpStatus status) {
