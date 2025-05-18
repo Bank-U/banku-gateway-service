@@ -34,6 +34,7 @@ spring:
             allowCredentials: true
             maxAge: 3600
       routes:
+        # User Service Routes
         - id: user-service
           uri: ${USER_SERVICE_URL:http://localhost:8081}
           predicates:
@@ -56,6 +57,14 @@ spring:
             - Path=/api/v1/openbanking/**
           filters:
             - name: JwtAuthenticationFilter
+
+        # WebSocket Routes
+        - id: engine-websocket
+          uri: ${ENGINE_SERVICE_WS:ws://localhost:8083}
+          predicates:
+            - Path=/ws/engine/**
+          filters:
+            - name: WebSocketTokenRelayFilter
 
   security:
     whitelist:
@@ -90,6 +99,4 @@ management:
 # Logging Configuration
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.security: DEBUG
-    com.banku.gatewayservice: DEBUG 
+    root: DEBUG
